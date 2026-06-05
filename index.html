@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multiplication Practice</title>
+
+  <style>
+    body {
+      font-family: Veranda, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .problem {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .solution {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #eef6ff;
+      border-radius: 8px;
+      display: none;
+    }
+
+    button {
+      margin: 10px 5px;
+      padding: 10px 18px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .show-btn {
+      background-color: #4a90e2;
+      color: white;
+    }
+
+    .new-btn {
+      background-color: #44aa66;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Multiplication Practice</h1>
+
+    <div class="problem" id="problem"></div>
+
+    <button class="show-btn" onclick="toggleSolution()">
+      Show Solution
+    </button>
+
+    <button class="new-btn" onclick="generateProblem()">
+      New Problem
+    </button>
+
+    <div class="solution" id="solutionBox">
+      <h3>Solution</h3>
+
+      <p id="solutionText"></p>
+
+      <h3>Explanation</h3>
+
+      <p id="explanationText"></p>
+    </div>
+  </div>
+
+  <script>
+    let num1;
+    let num2;
+    let showing = false;
+
+    function generateProblem() {
+
+      // Generate two random numbers from 2 to 12
+      num1 = Math.floor(Math.random() * 11) + 2;
+      num2 = Math.floor(Math.random() * 11) + 2;
+
+      // Update problem text
+      document.getElementById("problem").textContent =
+        `${num1} × ${num2} = ?`;
+
+      // Update solution text
+      document.getElementById("solutionText").textContent =
+        `${num1} × ${num2} = ${num1 * num2}`;
+
+      // Update explanation text
+      document.getElementById("explanationText").textContent =
+        `To solve this problem, multiply ${num1} by ${num2}. ` +
+        `You can think of this as adding ${num1} together ${num2} times. ` +
+        `The final answer is ${num1 * num2}.`;
+
+      // Hide solution box
+      document.getElementById("solutionBox").style.display = "none";
+
+      // Reset button text
+      document.querySelector(".show-btn").textContent = "Show Solution";
+
+      showing = false;
+    }
+
+    function toggleSolution() {
+
+      const solutionBox = document.getElementById("solutionBox");
+      const button = document.querySelector(".show-btn");
+
+      showing = !showing;
+
+      if (showing) {
+        solutionBox.style.display = "block";
+        button.textContent = "Hide Solution";
+      } else {
+        solutionBox.style.display = "none";
+        button.textContent = "Show Solution";
+      }
+    }
+
+    // Generate first problem when page loads
+    generateProblem();
+  </script>
+
+</body>
+</html>
