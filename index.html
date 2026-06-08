@@ -7,22 +7,44 @@
 
   <style>
     body {
-      font-family: Veranda, sans-serif;
-      background-color: #f4f4f4;
+      font-family: Times New Roman;
+      background-color: #510000;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      max-height: 100vh;
     }
 
     .card {
+      margin: 20px auto;
       background: white;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      width: 400px;
+      max-width: 400px;
       text-align: center;
+      position: relative;
+      padding-bottom: 60px;
     }
+    
+    .card-footer {
+ 	 margin-top: 16px;
+	  padding-top: 10px;
+	  border-top: 1px solid rgba(0, 0, 0, 0.1);
+	  font-size: 0.85rem;
+	  color: #666;
+	  text-align: left;
+	  font-style: italic;
+	}
+    
+    .card-logo {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 40px;   /* adjust size */
+  height: auto;
+  opacity: 0.7;  /* subtle look */
+}
 
     h1 {
       margin-bottom: 20px;
@@ -63,6 +85,9 @@
     button:hover {
       opacity: 0.9;
     }
+    textContent.multiline-text {
+  white-space: pre-line; /* Collapses extra spaces but keeps literal line breaks */
+}
   </style>
 </head>
 <body>
@@ -88,7 +113,13 @@
       <h3>Explanation</h3>
 
       <p id="explanationText"></p>
-    </div>
+     </div>
+      <div class="card-footer">
+    	This resource is brought to you by <strong>Thomas Uptergrove at Schreiner University.</strong>
+       <div class="card-logo"> 
+       <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRX4czKuaPO-C51BZ94qhhRvXc-wnYMGc1e1Q&s" width=40>
+       </div>
+  	  </div>
   </div>
 
   <script>
@@ -111,16 +142,17 @@
         `${num1} × ${num2} = ${num1 * num2}`;
 
       // Update explanation text
-      document.getElementById("explanationText").textContent =
-        `To solve this problem, multiply ${num1} by ${num2}. ` +
-        `You can think of this as adding ${num1} together ${num2} times. ` +
-        `The final answer is ${num1 * num2}.`;
+document.getElementById("explanationText").innerHTML =
+  `To solve this problem, multiply ${num1} by ${num2}.<br>` +
+  `You can think of this as adding a total of ${num1}  ${num2}'s together .<br>` +
+  `The final answer is ${num1 * num2}.`;
+      
 
       // Hide solution box
       document.getElementById("solutionBox").style.display = "none";
 
       // Reset button text
-      document.querySelector(".show-btn").textContent = "Show Solution";
+      document.querySelector(".show-btn").innerHTML = "Show Solution";
 
       showing = false;
     }
