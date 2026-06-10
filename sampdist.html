@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sampling Distributions Lab</title>
+
+<style>
+  body {
+    font-family: Times New Roman, sans-serif;
+    margin: 20px;
+    background-color: #510000;
+    color: #ffffff;
+  }
+
+  /* VARIABLES GRID */
+  .controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 220px;
+  }
+
+  .control-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  }
+
+  input {
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  button {
+  padding: 8px 12px;
+  cursor: pointer;
+  width: 100%;
+  }
+
+  canvas {
+    border: 1px solid #ccc;
+    background-color: white;
+  }
+
+  /* EXPLANATION BOX */
+  #explanationBox {
+    display: none;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: white;
+    color: black;
+    max-width: 600px;
+    border: 1px solid #ccc;
+  }
+
+  .tab-buttons {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .tab {
+    display: none;
+  }
+
+  .tab.active {
+    display: block;
+  }
+
+  /* BUTTON ROW */
+  .button-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 15px;
+  }
+  
+  .top-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Sampling Distributions Lab</h2>
+
+<!-- TOP SECTION -->
+
+<div class="top-section">
+
+  <!-- MODEL -->
+  <canvas id="chart" width="600" height="450"></canvas>
+
+  <!-- VARIABLES -->
+  <div class="controls">
+
+    <div class="control-item">
+      <label>Population Mean</label>
+      <input id="mean" type="number" value="0" step="0.1">
+    </div>
+
+    <div class="control-item">
+      <label>Standard Deviation</label>
+      <input id="std" type="number" value="1" step="0.1" min="0.1">
+    </div>
+
+    <div class="control-item">
+      <label>Sample Size (n)</label>
+      <input id="batch" type="number" value="30" min="1">
+    </div>
+
+    <div class="control-item">
+      <label>Total Samples (N)</label>
+      <input id="target" type="number" value="300" min="10">
+    </div>
+
+    <div class="control-item">
+      <label>Means / Frame</label>
+      <input id="rate" type="number" value="3" min="1">
+    </div>
+<div class="button-panel">
+  <button onclick="stepOnce()">Take 1 Sample</button>
+  <button onclick="toggleRun()">Pause / Resume</button>
+  <button onclick="resetThenRun()">Run / Reset</button>
+  <button onclick="toggleExplanation()">Explanation</button>
+</div>
+  </div>
+
+</div>
+
+<!-- EXPLANATION BOX -->
+
+<div id="explanationBox">
+
+  <div class="tab-buttons">
+    <button onclick="setTab('what')">What's happening?</button>
+    <button onclick="setTab('why')">Why do this?</button>
+    <button onclick="setTab('math')">Interesting Trends</button>
+  </div>
+
+  <div id="what" class="tab active">
+    <h3>What is happening?</h3>
+    <p>
+      The model is taking samples from a randomized dataset with the specified statistics.
+      It will then keep taking them, adding their sample means to the model below until
+      it reaches however many are listed as the Total Samples (N).
+    </p>
+  </div>
+
+  <div id="why" class="tab">
+    <h3>Why do this?</h3>
+    <p>
+      Since, in statistics, we work with samples more than populations,
+      it's a good idea to understand what sampling distributions
+      wind up looking like.
+    </p>
+  </div>
+
+  <div id="math" class="tab">
+    <h3>Interesting Trends</h3>
+    <p>
+      Looking at the variables here, which ones change the most about the
+      way the model looks?<br>
+      Why do YOU think that variable matters for the shape of the graph?
+    </p>
+  </div>
+
+</div>
+
+
+<script>
+const canvas = document.getElementById("chart");
+const ctx = canvas.getContext("2d");
+
+let means = [];
+let running = false;
+
+function randNormal(mean = 0, std = 1) {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v) * std + mean;
+}
+
+function sampleMean(mean, std, n) {
+  let sum = 0;
+  for (let i = 0; i < n; i++) {
+    sum += randNormal(mean, std);
+  }
+  return sum / n;
+}
+
+function normalPDF(x, mu, sigma) {
+  return (1 / (sigma * Math.sqrt(2 * Math.PI))) *
+         Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+}
+
+/* LOOP */
+function loop() {
+  if (!running) return;
+
+  const mean = +document.getElementById("mean").value;
+  const std = +document.getElementById("std").value;
+  const batch = +document.getElementById("batch").value;
+  const target = +document.getElementById("target").value;
+  const rate = +document.getElementById("rate").value;
+
+  for (let i = 0; i < rate; i++) {
+    if (means.length >= target) {
+      running = false;
+      return;
+    }
+    means.push(sampleMean(mean, std, batch));
+  }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* AXES */
+function drawAxes(p, w, h, min, max, maxCount) {
+  ctx.strokeStyle = "black";
+  ctx.fillStyle = "black";
+  ctx.font = "12px Consolas";
+
+  ctx.beginPath();
+  ctx.moveTo(p, p);
+  ctx.lineTo(p, p + h);
+  ctx.lineTo(p + w, p + h);
+  ctx.stroke();
+
+  const xTicks = 6;
+  const yTicks = 6;
+
+  for (let i = 0; i <= xTicks; i++) {
+    const x = p + (i / xTicks) * w;
+    const val = min + (i / xTicks) * (max - min);
+
+    ctx.beginPath();
+    ctx.moveTo(x, p + h);
+    ctx.lineTo(x, p + h + 6);
+    ctx.stroke();
+
+    ctx.fillText(val.toFixed(2), x - 20, p + h + 20);
+  }
+
+  for (let i = 0; i <= yTicks; i++) {
+    const y = p + h - (i / yTicks) * h;
+    const val = (i / yTicks) * maxCount;
+
+    ctx.beginPath();
+    ctx.moveTo(p - 6, y);
+    ctx.lineTo(p, y);
+    ctx.stroke();
+
+    ctx.fillText(val.toFixed(0), p - 40, y + 4);
+  }
+}
+
+/* DRAW */
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const p = 50;
+  const w = canvas.width - p * 2;
+  const h = canvas.height - p * 2;
+
+  if (means.length === 0) return;
+
+  const min = Math.min(...means);
+  const max = Math.max(...means);
+
+  const bins = 30;
+  const binW = (max - min) / bins || 1;
+
+  const counts = new Array(bins).fill(0);
+
+  for (let v of means) {
+    let i = Math.floor((v - min) / binW);
+    if (i < 0) i = 0;
+    if (i >= bins) i = bins - 1;
+    counts[i]++;
+  }
+
+  const maxCount = Math.max(...counts);
+
+  drawAxes(p, w, h, min, max, maxCount);
+
+  const barW = w / bins;
+
+  for (let i = 0; i < bins; i++) {
+    const barH = (counts[i] / maxCount) * h;
+
+    const x = p + i * barW;
+    const y = p + h - barH;
+
+    ctx.fillStyle = "#510000";
+    ctx.fillRect(x, y, barW - 2, barH);
+  }
+
+  const mu = +document.getElementById("mean").value;
+  const sigma = +document.getElementById("std").value / Math.sqrt(+document.getElementById("batch").value);
+
+  let maxPDF = 0;
+  for (let i = 0; i <= 200; i++) {
+    const x = min + (i / 200) * (max - min);
+    maxPDF = Math.max(maxPDF, normalPDF(x, mu, sigma));
+  }
+
+  ctx.beginPath();
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 2;
+
+  for (let i = 0; i <= 200; i++) {
+    const xVal = min + (i / 200) * (max - min);
+    const pdf = normalPDF(xVal, mu, sigma);
+
+    const x = p + ((xVal - min) / (max - min)) * w;
+    const y = p + h - (pdf / maxPDF) * h;
+
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+
+  ctx.stroke();
+
+  const empiricalMean = means.reduce((a, b) => a + b, 0) / means.length;
+
+  ctx.fillStyle = "black";
+  ctx.fillText(`Samples: ${means.length}`, 140, 20);
+  ctx.fillText(`μ: ${mu.toFixed(3)}  SE: ${sigma.toFixed(4)}`, 240, 20);
+  ctx.fillText(`Empirical Mean: ${empiricalMean.toFixed(3)}`, 400, 20);
+}
+
+/* BUTTONS */
+function resetThenRun() {
+  means = [];
+  running = true;
+  requestAnimationFrame(loop);
+}
+
+function toggleRun() {
+  running = !running;
+  if (running) requestAnimationFrame(loop);
+}
+
+function stepOnce() {
+  const mean = +document.getElementById("mean").value;
+  const std = +document.getElementById("std").value;
+  const batch = +document.getElementById("batch").value;
+
+  means.push(sampleMean(mean, std, batch));
+  draw();
+}
+
+/* EXPLANATION */
+function toggleExplanation() {
+  const box = document.getElementById("explanationBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+}
+
+function setTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* INIT */
+draw();
+</script>
+<br><br>
+<p>
+This interactive lab is brought to you by Schreiner University.
+</p>
+</body>
+</html>
