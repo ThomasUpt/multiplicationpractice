@@ -182,18 +182,19 @@ const ctx = canvas.getContext("2d");
 let means = [];
 let running = false;
 
-function randNormal(mean = 0, std = 1) {
-  let u = 0, v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
-  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v) * std + mean;
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 function sampleMean(mean, std, n) {
   let sum = 0;
+  let bot = mean - (3 * std);
+  let top = mean + (3 * std);
+
   for (let i = 0; i < n; i++) {
-    sum += randNormal(mean, std);
+    sum += getRandom(bot, top);
   }
+
   return sum / n;
 }
 
@@ -335,7 +336,7 @@ function draw() {
   ctx.fillStyle = "black";
   ctx.fillText(`Samples: ${means.length}`, 140, 20);
   ctx.fillText(`μ: ${mu.toFixed(3)}  SE: ${sigma.toFixed(4)}`, 240, 20);
-  ctx.fillText(`Empirical Mean: ${empiricalMean.toFixed(3)}`, 400, 20);
+  ctx.fillText(`Empirical Mean: ${empiricalMean.toFixed(3)}`, 390, 20);
 }
 
 /* BUTTONS */
